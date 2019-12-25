@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="icon" href="su.png">
+    <title>Su Yolu </title>
+  <style>
+    body { margin: 0; }
+    img { width: 100% }
+    div {
+        position: fixed;
+        border: 1px solid cyan;
+        cursor: pointer;
+        width: 15vw;
+        height: 9vw;
+    }
+    #d01 { left:  1vw; top:  9vw; }
+    #d02 { left: 17vw; top: 10vw; }
+    #d03 { left: 16vw; top: 20vw; }
+    #d04 { left: 13vw; top: 40vw; }
+    #d05 { left: 30vw; top: 34vw; }
+    #d06 { left: 39vw; top: 17vw; }
+    #d07 { left: 47vw; top:  1vw; }
+    #d08 { left: 58vw; top: 32vw; }
+    #d09 { left: 43vw; top: 44vw; }
+    #version {
+        position: fixed;
+        top: 0; margin: 5px;
+    }
+    #fileName {
+        position: fixed;
+        bottom: 0; margin: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<p id=version>V0.3</p>
+<p id=fileName></p>
+
+<img id=harita src=harita01.jpg></img>
+
+<div id=d01 title='1.havza.jpg'></div>
+<div id=d02 title='2.bent.jpg'></div>
+<div id=d03 title='3.galeri.jpg'></div>
+<div id=d04 title='4.havuz.jpg'></div>
+<div id=d05 title='5.kemer.jpg'></div>
+<div id=d06 title='6.maksem.jpg'></div>
+<div id=d07 title='7.cesme.jpg'></div>
+<div id=d08 title='8.sadirvan.jpg'></div>
+<div id=d09 title='9.hamam.jpg'></div>
+
+<script src="https://lab.hakim.se/zoom-js/js/zoom.js"></script>
+<script>
+"use strict";
+var file
+var dur = 3000 //msec
+const b0 = 'translate(0, 0)'
+const a1 = ['scale(1) translate(0, 0)', 'scale(3) translate(xxx)']
+function boxStyle(s) {
+    for (let d of document.querySelectorAll('div'))
+        d.style.display = s
+}
+function display() {
+    console.log("display", file)
+    if (!file) return
+    harita.src = file
+    let k = file.indexOf('.jpg')
+    fileName.innerText = file.substring(0, k)
+    harita.onclick = normal
+    boxStyle('none')
+    setTimeout(zoom.out, 10)
+    //harita.style.transform =''
+}
+function normal() {
+    console.log("normal")
+    harita.src = 'harita01.jpg'
+    harita.onclick = ''
+    fileName.innerText = ''
+    boxStyle('')
+}
+function handleClick(e) {
+	if (zoom.zoomLevel() > 1) normal()
+	else {
+	    let t = e.target; file = t.title
+	    if (!file) return
+	    e.preventDefault()
+        console.log("zoom", file)
+	    zoom.to({ element: t, pan: false })
+	    setTimeout(display, dur)
+	}
+}
+	document.body.onclick = handleClick
+</script>
+</body>
+</html>
