@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="icon" href="data/su.png">
+    <title>Su Yolu </title>
+  <style>
+    body { 
+        margin: 0;
+        background: gray;
+    }
+    img {
+        position: absolute;
+        width: 100%;
+        top: 0; left: 0;
+        opacity: 0;
+        transition: opacity 2s ease;
+    }
+    #main {
+        position: absolute;
+        top: 0;
+    }
+    .box {
+        position: inherit;
+        border: 1px solid cyan;
+        cursor: pointer;
+        width: 15vw;
+        height: 9vw;
+    }
+    #d01 { left:  1vw; top:  9vw; }
+    #d02 { left: 17vw; top: 10vw; }
+    #d03 { left: 16vw; top: 20vw; }
+    #d04 { left: 13vw; top: 40vw; }
+    #d05 { left: 30vw; top: 34vw; }
+    #d06 { left: 39vw; top: 17vw; }
+    #d07 { left: 47vw; top:  1vw; }
+    #d08 { left: 58vw; top: 30vw; }
+    #d09 { left: 43vw; top: 44vw; }
+    #surum { top: 0; }
+    #isim  { bottom: 0; }
+    #metin {
+        top: 10vw; height: 8vw;
+        left: 25%; width: 50%;
+        background: darkblue;
+        color: yellow;
+        font-size: 3vw;
+        text-align: center;
+        padding: 1vw;
+    }
+    #surum, #isim, #metin {
+        position: fixed;
+        margin: 5px;
+        z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <img id=harita src='data/harita01.jpg'></img>
+  <img id=oyun></img>
+  <p id=surum>V0.5</p>
+  <p id=isim></p>
+  <p id=metin></p>
+
+<div id=main>
+  <div id=d01 class=box></div>
+  <div id=d02 class=box></div>
+  <div id=d03 class=box></div>
+  <div id=d04 class=box></div>
+  <div id=d05 class=box></div>
+  <div id=d06 class=box></div>
+  <div id=d07 class=box></div>
+  <div id=d08 class=box></div>
+  <div id=d09 class=box></div>
+</div>
+
+<script src="https://code.responsivevoice.org/responsivevoice.js?key=Ayb0S4YG"></script> 
+<script src="https://lab.hakim.se/zoom-js/js/zoom.js"></script>
+<script>
+"use strict";
+var elt //selected game
+const dur = 2000 //msec
+const smooth = "-webkit-transform 2s ease"
+function boxStyle(s='') {
+    //for (let d of document.querySelectorAll('.box'))
+    main.style.display = s
+}
+function handleClick(e) {
+	if (zoom.zoomLevel() > 1) return
+    elt = e.target
+    if (!elt.title) return
+    e.preventDefault()
+    console.log("zoom", elt.title)
+    document.body.style.transition = smooth
+    zoom.to({ element: elt, pan: false })
+    //harita.onclick = toGame
+    setTimeout(toGame, 2*dur)
+}
+function toGame() {
+    //harita.onclick = ''
+    if (!elt.title) return
+    document.body.style.transition = ''
+    zoom.out()  //fast
+    let m = elt.message  //eltToMsg.get(elt)
+    toSpeech(m); metin.innerText = m
+    metin.style.display = ''
+    setTimeout(()=> {metin.style.display = 'none'}, 2*dur)
+    harita.style.display = 'none'
+    isim.innerText = elt.title
+    oyun.src = 'data/'+elt.title+'.jpg'
+    oyun.style.opacity = 1
+    boxStyle('none')
+    setTimeout(faded, dur)
+  function faded() {
+    console.log("faded")
+    oyun.onclick = toMap
+  }
+}
+function toMap(e) {
+    console.log("toMap")
+    e.preventDefault()
+    oyun.style.opacity = ''
+    oyun.onclick = ''
+    metin.innerText = ''
+    isim.innerText = ''
+    harita.style.display = ''
+    boxStyle('')
+}
+function toSpeech(t) { 
+    if (!t || !responsiveVoice) return 
+    responsiveVoice.speak(t, "Turkish Female")
+}
+//const eltToMsg = new Map()
+function initMap() {
+    const a = [
+'1.havza#Birinci oyun: Havzadaki su yollarını birleştirelim',
+'2.bent#İkinci oyun: Tuğlaları kullanarak bent yapalım',
+'3.galeri#Üçüncü oyun: Galeride hangi kapaklar daha uygun?',
+'4.havuz#Dördüncü oyun: Havuzun giriş ve çıkış düzeylerini ayarlayalım',
+'5.kemer#Beşinci oyun: Tepelerin arasını su kemeri ile bağlayalım',
+'6.maksem#Altıncı oyun: Maksemden geçen suyu taksim edelim',
+'7.cesme#Yedinci oyun: Çeşmeyi tamir ettikten sonra sakayı bulalım',
+'8.sadirvan#Sekizinci oyun: Şadırvan yıkılmış, tamir edelim',
+'9.hamam#Dokuzuncu oyun: Hamama giren terler!' ]
+    for (let i=0; i<a.length; i++) {
+        let [t, m] = a[i].split('#')
+        let e = main.querySelector('#d0'+(i+1))
+        e.title = t; e.message = m //eltToMsg.set(e, m)
+    }
+}
+    metin.style.display = 'none'; initMap()
+    //responsiveVoice.setDefaultVoice("Turkish Female")
+	main.onclick = handleClick
+	harita.style.opacity = 1
+</script>
+</body>
+</html>
