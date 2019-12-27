@@ -4,4 +4,4 @@ as an Istanbul based art initiative in 2013, arranges installations, performance
 spatial organizations by focusing on the interaction between artistic activity and space. 
 
 ## Su Yolu
-Educational game for teaching water distribution in 16. century
+Educational game for teaching water distribution in 16. century -- [here](https://yogunluk.github.io/suyolu/sunum)
