@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
+    <script src="https://unpkg.com/konva@4.1.2/konva.min.js"></script>
     <link rel="icon" href="data/su.png">
     <title>Su Yolu </title>
   <style>
@@ -115,7 +116,7 @@ function toGame() {
     setTimeout(faded, dur)
   function faded() {
     console.log("faded")
-    oyun.onclick = toMap
+    // oyun.onclick = toMap
   }
 }
 function toMap(e) {

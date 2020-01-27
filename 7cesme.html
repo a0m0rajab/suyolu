@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/konva@4.1.2/konva.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Konva parts on the Beach Game Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script>
+        // var width = window.innerWidth;
+        // var height = window.innerHeight;
+        let width = screen.width,
+            height = screen.height;
+
+        function loadImages(sources, callback) {
+
+            var assetDir = '/7.cesme/';
+            var images = {};
+            var loadedImages = 0;
+            var numImages = 0;
+            for (var src in sources) {
+                numImages++;
+            }
+            for (var src in sources) {
+                images[src] = new Image();
+                images[src].onload = function() {
+                    if (++loadedImages >= numImages) {
+                        callback(images);
+                    }
+                };
+                images[src].src = assetDir + sources[src];
+            }
+        }
+
+        function isNearOutline(part, outline) {
+            var a = part;
+            var o = outline;
+            var ax = a.x();
+            var ay = a.y();
+
+            if (ax > o.x - 20 && ax < o.x + 20 && ay > o.y - 20 && ay < o.y + 20) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function drawBackground(background, backgroundImage, text) {
+            var context = background.getContext();
+            context.drawImage(backgroundImage, 0, 0);
+            context.setAttr('font', '20pt Calibri');
+            context.setAttr('textAlign', 'center');
+            context.setAttr('fillStyle', 'black');
+            context.fillText(text, background.getStage().width() / 2, 150);
+        }
+        let partLayer, stage, background, Gimages;
+
+        function initStage(images) {
+            Gimages = images;
+            stage = new Konva.Stage({
+                container: 'container',
+                width: width,
+                height: height
+            });
+            background = new Konva.Layer();
+            partLayer = new Konva.Layer();
+            var partShapes = [];
+            var score = 0;
+
+            // image positions
+            var parts = {
+                havuz: {
+                    x: 355,
+                    y: 34
+                },
+                muslukYeri: {
+                    x: 1288,
+                    y: 40
+                },
+                etraflar1: {
+                    x: 820,
+                    y: 40
+                },
+                etraflar: {
+                    x: 1163,
+                    y: 40
+                },
+                left: {
+                    x: 938,
+                    y: 27
+                },
+                middle: {
+                    x: 1050,
+                    y: 28
+                },
+                right: {
+                    x: 612,
+                    y: 43
+                },
+                left1: {
+                    x: 938,
+                    y: 27
+                },
+                middle1: {
+                    x: 252,
+                    y: 28
+                },
+                right1: {
+                    x: 156,
+                    y: 43
+                }
+            };
+            /*
+            
+             
+                Client X/Y: 941, 32
+            2VM2914:7 
+                Screen X/Y: 373, 244
+                Client X/Y: 156, 43
+            */
+            var outlines = {
+                // ok.
+                havuz_black: {
+                    x: 649,
+                    y: 388
+                },
+                // OK
+                muslukYeri_black: {
+                    x: 667,
+                    y: 362
+                },
+                // ok
+                etraflar1_black: {
+                    x: 589 + 135,
+                    y: 400
+                },
+                // ok
+                etraflar_black: {
+                    x: 589,
+                    y: 400
+                },
+                // ok
+                right_black: {
+                    x: 586,
+                    y: 350
+                },
+                // ok
+                left_black: {
+                    x: 602,
+                    y: 358
+                },
+                // ok
+                middle_black: {
+                    x: 590,
+                    y: 348
+                },
+                right1_black: {
+                    x: 586 + 135,
+                    y: 350
+                },
+                // ok
+                left1_black: {
+                    x: 602 + 135,
+                    y: 358
+                },
+                // ok
+                middle1_black: {
+                    x: 590 + 135,
+                    y: 348
+                },
+
+            };
+
+            // create draggable parts
+            for (var key in parts) {
+                // anonymous function to induce scope
+                (function() {
+                    var privKey = key;
+                    var anim = parts[key];
+
+                    var part = new Konva.Image({
+                        image: images[key],
+                        x: anim.x,
+                        y: anim.y,
+                        draggable: true
+                    });
+
+                    part.on('dragstart', function() {
+                        this.moveToTop();
+                        partLayer.draw();
+                    });
+                    /*
+                     * check if part is in the right spot and
+                     * snap into place if it is
+                     */
+                    part.on('dragend', function() {
+                        var outline = outlines[privKey + '_black'];
+                        if (!part.inRightPlace && isNearOutline(part, outline)) {
+                            part.position({
+                                x: outline.x,
+                                y: outline.y
+                            });
+                            partLayer.draw();
+                            part.inRightPlace = true;
+
+                            if (++score >= 10) {
+                                var text = 'Sakayi bul :)';
+                                drawBackground(background, images.background, text);
+                                drawSaka();
+                            }
+
+                            // disable drag and drop
+                            setTimeout(function() {
+                                part.draggable(false);
+                            }, 50);
+                        }
+                    });
+                    // make part glow on mouseover
+                    part.on('mouseover', function() {
+                        // part.image(images[privKey + '_glow']);
+                        // partLayer.draw();
+                        document.body.style.cursor = 'pointer';
+                    });
+                    // return part on mouseout
+                    part.on('mouseout', function() {
+                        part.image(images[privKey]);
+                        partLayer.draw();
+                        document.body.style.cursor = 'default';
+                    });
+
+                    part.on('dragmove', function() {
+                        document.body.style.cursor = 'pointer';
+                    });
+
+                    partLayer.add(part);
+                    partShapes.push(part);
+                })();
+            }
+
+            // create part outlines
+            for (var key in outlines) {
+                // anonymous function to induce scope
+                (function() {
+                    var imageObj = images[key];
+                    var out = outlines[key];
+
+                    var outline = new Konva.Image({
+                        image: imageObj,
+                        x: out.x,
+                        y: out.y
+                    });
+
+                    partLayer.add(outline);
+                })();
+            }
+
+            stage.add(background);
+            stage.add(partLayer);
+
+            drawBackground(
+                background,
+                images.background,
+                '7ci oyun, cesmeyi tamir et, sakayi bul!'
+            );
+        }
+
+        function drawSaka() {
+            var ellipse = new Konva.Ellipse({
+                x: 1010,
+                y: 330,
+                radiusX: 10,
+                radiusY: 30,
+                stroke: 'black',
+                strokeWidth: 0
+            });
+            ellipse.on('mouseover', function() {
+
+                document.body.style.cursor = 'pointer';
+            });
+            ellipse.on('mouseout', function() {
+                document.body.style.cursor = 'default';
+            });
+            ellipse.on('click', function() {
+                partLayer.remove()
+                drawBackground(
+                    background,
+                    Gimages.backgroundFinal,
+                    'Basarilar, oyunu bitirdiniz..!'
+                );
+            })
+            partLayer.add(ellipse)
+            partLayer.draw()
+        }
+
+        var sources = {
+            background: 'bgInit.png',
+            backgroundFinal: 'bgFinal.png',
+
+            havuz: 'havuz.png',
+            muslukYeri: 'muslukYeri.png',
+            etraflar: 'etraflar.png',
+            etraflar1: 'etraflar.png',
+            // lion: 'lion.png',
+            // lion_glow: 'lion-glow.png',
+            // lion_black: 'lion-black.png',
+            left: 'left.png',
+            middle: 'middle.png',
+            right: 'right.png',
+            left1: 'left.png',
+            middle1: 'middle.png',
+            right1: 'right.png',
+            saka: '12.png',
+            // testing
+            // havuz_black: 'havuz.png',
+            // muslukYeri_black: 'muslukYeri.png',
+            // etraflar_black: 'etraflar.png',
+            // etraflar1_black: 'etraflar.png',
+            // left_black: 'left.png',
+            // middle_black: 'middle.png',
+            // right_black: 'right.png',
+            // left1_black: 'left.png',
+            // middle1_black: 'middle.png',
+            // right1_black: 'right.png',
+        };
+        loadImages(sources, initStage);
+    </script>
+</body>
+
+</html>
