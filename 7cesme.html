@@ -4,7 +4,8 @@
 <head>
     <script src="https://unpkg.com/konva@4.1.2/konva.min.js"></script>
     <meta charset="utf-8" />
-    <title>Konva parts on the Beach Game Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>7 oyun çesme!</title>
     <style>
         body {
             margin: 0;
@@ -12,16 +13,22 @@
             overflow: hidden;
             background-color: #f0f0f0;
         }
+        #stage-parent {
+        width: 100%;
+      }
     </style>
 </head>
 
 <body>
-    <div id="container"></div>
+    <div id="stage-parent">
+        <div id="container"></div>
+      </div>
     <script>
         // var width = window.innerWidth;
         // var height = window.innerHeight;
-        let width = screen.width,
-            height = screen.height;
+        // let width = screen.width,
+        //     height = screen.height;
+        let width=1450,height=1000;
 
         function loadImages(sources, callback) {
 
@@ -37,10 +44,12 @@
                 images[src].onload = function() {
                     if (++loadedImages >= numImages) {
                         callback(images);
+                        fitStageIntoParentContainer();
                     }
                 };
                 images[src].src = assetDir + sources[src];
             }
+            // fitStageIntoParentContainer();
         }
 
         function isNearOutline(part, outline) {
@@ -55,14 +64,31 @@
                 return false;
             }
         }
-
+        let lastBg= {};
+        
+        function drawLastBg(){
+            drawBackground(lastBg.bg, lastBg.bgImg, lastBg.text)
+        }
         function drawBackground(background, backgroundImage, text) {
+
+            lastBg.bg=background;
+            lastBg.bgImg = backgroundImage;
+            lastBg.text= text;
+            // 
+            var container = document.querySelector('#stage-parent');
+            // now we need to fit stage into parent
+            var containerWidth = container.offsetWidth;
+            var scale = containerWidth / width;
+            var sy = container.offsetHeight / height;
+            // 
             var context = background.getContext();
-            context.drawImage(backgroundImage, 0, 0);
-            context.setAttr('font', '20pt Calibri');
+            context.drawImage(backgroundImage, 0, 0,backgroundImage.width*scale,backgroundImage.height*sy);
+            context.setAttr('font', '100% Calibri');
             context.setAttr('textAlign', 'center');
             context.setAttr('fillStyle', 'black');
-            context.fillText(text, background.getStage().width() / 2, 150);
+            context.fillText(text, backgroundImage.width*scale/2,backgroundImage.height*sy/4);
+
+            // fitStageIntoParentContainer();
         }
         let partLayer, stage, background, Gimages;
 
@@ -245,6 +271,8 @@
 
                     partLayer.add(part);
                     partShapes.push(part);
+                    
+
                 })();
             }
 
@@ -282,7 +310,7 @@
                 radiusX: 10,
                 radiusY: 30,
                 stroke: 'black',
-                strokeWidth: 0
+                strokeWidth: 2
             });
             ellipse.on('mouseover', function() {
 
@@ -292,6 +320,14 @@
                 document.body.style.cursor = 'default';
             });
             ellipse.on('click', function() {
+                partLayer.remove()
+                drawBackground(
+                    background,
+                    Gimages.backgroundFinal,
+                    'Basarilar, oyunu bitirdiniz..!'
+                );
+            })
+            ellipse.on('touchstart', function() {
                 partLayer.remove()
                 drawBackground(
                     background,
@@ -334,6 +370,24 @@
             // right1_black: 'right.png',
         };
         loadImages(sources, initStage);
+        function fitStageIntoParentContainer() {
+        var container = document.querySelector('#stage-parent');
+
+        // now we need to fit stage into parent
+        var containerWidth = container.offsetWidth;
+        // to do this we need to scale the stage
+        var scale = containerWidth / width;
+
+        stage.width(width * scale);
+        stage.height(height * scale);
+        stage.scale({ x: scale, y: scale });
+        stage.draw();
+        drawLastBg()
+      }
+    //   fitStageIntoParentContainer();
+
+      // adapt the stage on any window resize
+      window.addEventListener('resize', fitStageIntoParentContainer);
     </script>
 </body>
 
